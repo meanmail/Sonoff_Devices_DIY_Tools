@@ -6,7 +6,7 @@
 import json
 from socket import *
 
-from PySide2.QtCore import *
+from PySide2.QtCore import QThread, Signal
 
 
 class SeverThreadForQT(QThread):
@@ -124,37 +124,40 @@ class SeverThreadForQT(QThread):
         print('post:', data)
         json_data = json.loads(self.find_post_json(data))
         print('json_data', json_data)
-        if 'error' in json_data:
-            if json_data['error'] == 0:
-                if self.send_over_flg:
-                    print('To complete the transfer')
-                    post_new = 'post\n\n0'
-                else:
-                    print('Download failed')
-                    post_new = 'post\n\n1'
-                print(post_new)
-                self.ota_state_Thread.emit(post_new)
+
+        if 'error' not in json_data:
+            return
+
+        if json_data['error'] == 0:
+            if self.send_over_flg:
                 print('To complete the transfer')
-            elif json_data['error'] == 404:
-                post_new = 'post\n\n404'
-                print(post_new)
-                self.ota_state_Thread.emit(post_new)
+                post_new = 'post\n\n0'
+            else:
                 print('Download failed')
-            elif json_data['error'] == 406:
-                post_new = 'post\n\n406'
-                print(post_new)
-                self.ota_state_Thread.emit(post_new)
-                print('Error issuing upgrade message')
-            elif json_data['error'] == 409:
-                post_new = 'post\n\n409'
-                print(post_new)
-                self.ota_state_Thread.emit(post_new)
-                print('Check failure')
-            elif json_data['error'] == 410:
-                post_new = 'post\n\n410'
-                print(post_new)
-                self.ota_state_Thread.emit(post_new)
-                print('Internal error of equipment')
+                post_new = 'post\n\n1'
+            print(post_new)
+            self.ota_state_Thread.emit(post_new)
+            print('To complete the transfer')
+        elif json_data['error'] == 404:
+            post_new = 'post\n\n404'
+            print(post_new)
+            self.ota_state_Thread.emit(post_new)
+            print('Download failed')
+        elif json_data['error'] == 406:
+            post_new = 'post\n\n406'
+            print(post_new)
+            self.ota_state_Thread.emit(post_new)
+            print('Error issuing upgrade message')
+        elif json_data['error'] == 409:
+            post_new = 'post\n\n409'
+            print(post_new)
+            self.ota_state_Thread.emit(post_new)
+            print('Check failure')
+        elif json_data['error'] == 410:
+            post_new = 'post\n\n410'
+            print(post_new)
+            self.ota_state_Thread.emit(post_new)
+            print('Internal error of equipment')
 
     @staticmethod
     def find_post_json(data):

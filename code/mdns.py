@@ -6,7 +6,7 @@
 
 import time
 
-from PySide2.QtCore import *
+from PySide2.QtCore import QThread, Signal
 from zeroconf import ServiceBrowser, Zeroconf
 
 
@@ -103,11 +103,14 @@ class MyListener(object):
         print('inter add_service()')
         self.all_sub_num += 1
         info = zeroconf.get_service_info(type, name)
-        if info.properties[b'type'] == b'diy_plug':
-            self.all_info_dict[name] = info
-            if name in self.all_del_sub:
-                self.all_del_sub.remove(name)
-                print(f'Service {name} added, service info: {info}')
+
+        if info.properties[b'type'] != b'diy_plug':
+            return
+
+        self.all_info_dict[name] = info
+        if name in self.all_del_sub:
+            self.all_del_sub.remove(name)
+            print(f'Service {name} added, service info: {info}')
 
     def flash_all_sub_info(self):
         """
@@ -152,12 +155,8 @@ def parse_address(address):
     add_list = []
     for i in range(4):
         add_list.append(int(address.hex()[(i * 2):(i + 1) * 2], 16))
-    add_str = (str(add_list[0]) + "." +
-               str(add_list[1]) + "." +
-               str(add_list[2]) + "." +
-               str(add_list[3]))
-    return add_str
+    return '.'.join(map(str, add_list))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

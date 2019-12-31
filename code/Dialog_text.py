@@ -451,9 +451,11 @@ class RootDialog(QDialog):
         self.pB_import_firmware.clicked.connect(self.choose_img)
         self.pB_OK.clicked.connect(self.start_root)
         self.pB_Cencel.clicked.connect(self.reject)
+
         self.myThread = None
         self.control_server_Thread = None
         self.img_sha256 = None
+        self.sub_id = None
 
     def retranslate_ui(self):
         self.setWindowTitle(
@@ -541,66 +543,71 @@ class RootDialog(QDialog):
         Test which ports are available[80, 1080, 8888, 6666, 9999]
         :return: (int)Available ports
         """
-        port_number = [80, 1080, 8888, 6666, 9999]
-        for index in port_number:
+        ports = [80, 1080, 8888, 6666, 9999]
+
+        for port in ports:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex(('127.0.0.1', index))
+            result = sock.connect_ex(('127.0.0.1', port))
             sock.close()
             if result == 0:
-                print(f'Port {index:d} is open')
+                print(f'Port {port:d} is open')
             else:
-                print(f'Port {index:d} is not open')
-                return index
+                print(f'Port {port:d} is not open')
+                return port
         return 0
 
     def choose_img(self):
         """
         Select the firmware
-                Select the firmware, copy the user's firmware to the current working directory,
-                and calculate the SHA256 value of the file, and verify whether the file is Dout,
-                and the firmware size is less than 508k,
-                and whether it is a '.bin' file
+                Select the firmware, copy the user's firmware to the current
+                working directory, and calculate the SHA256 value of the file,
+                and verify whether the file is Dout, and the firmware size is
+                less than 508k, and whether it is a '.bin' file
         :return:
         """
         dlg = QFileDialog()
         dlg.setFileMode(QFileDialog.AnyFile)
         dlg.setFilter(QDir.Files)
-        if dlg.exec_():
-            filenames = dlg.selectedFiles()
-            img_file = filenames[0]
-            self.lineEdit_firmware.clear()
-            # whether it is a '.bin' file
-            if '.bin' not in img_file:
-                QMessageBox.information(
-                    self,
-                    'ERROR',
-                    'The firmware selected is not a bin file',
-                    QMessageBox.Yes,
-                    QMessageBox.Yes
-                )
-                return
 
-            if self.get_file_to_work(img_file):
-                try:
-                    with open('itead.bin', 'rb') as file_obj:
-                        self.img = file_obj.read()
-                        print(type(self.img))
-                        print(len(self.img))
-                        sha256 = hashlib.sha256(self.img)
-                        self.img_sha256 = sha256.hexdigest()
-                        print(self.img_sha256)
-                        self.lineEdit_firmware.setText(img_file)
-                        self.file_flg = True
-                except BaseException:
-                    print('unknown err')
-            else:
-                QMessageBox.information(
-                    self,
-                    'ERROR',
-                    'Firmware file cannot be greater than 508k; The firmware must be Dout',
-                    QMessageBox.Yes,
-                    QMessageBox.Yes
-                )
+        if not dlg.exec_():
+            return
+
+        filenames = dlg.selectedFiles()
+        img_file = filenames[0]
+        self.lineEdit_firmware.clear()
+
+        # whether it is a '.bin' file
+        if '.bin' not in img_file:
+            QMessageBox.information(
+                self,
+                'ERROR',
+                'The firmware selected is not a bin file',
+                QMessageBox.Yes,
+                QMessageBox.Yes
+            )
+            return
+
+        if self.get_file_to_work(img_file):
+            try:
+                with open('itead.bin', 'rb') as file_obj:
+                    self.img = file_obj.read()
+                    print(type(self.img))
+                    print(len(self.img))
+                    sha256 = hashlib.sha256(self.img)
+                    self.img_sha256 = sha256.hexdigest()
+                    print(self.img_sha256)
+                    self.lineEdit_firmware.setText(img_file)
+                    self.file_flg = True
+            except BaseException:
+                print('unknown err')
+        else:
+            QMessageBox.information(
+                self,
+                'ERROR',
+                'Firmware file cannot be greater than 508k; The firmware must be Dout',
+                QMessageBox.Yes,
+                QMessageBox.Yes
+            )
 
     @staticmethod
     def get_file_to_work(bin_file):
@@ -611,11 +618,12 @@ class RootDialog(QDialog):
         try:
             with open(bin_file, 'rb') as file_obj:
                 b = bytearray(file_obj.read())
-                if (b[2] == 3) and (len(b) < 508000):
-                    file_obj.seek(0, 0)
-                    img = file_obj.read()
-                else:
+
+                if (b[2] != 3) or (len(b) >= 508000):
                     return False
+
+                file_obj.seek(0, 0)
+                img = file_obj.read()
         except BaseException:
             print('unknown err')
             return False
@@ -631,10 +639,12 @@ class RootDialog(QDialog):
         :return:
         """
         id = self.cBox_Dev.currentText()
-        if len(id) <= 1:
+
+        if len(id) < 2:
             return
+
         self.dev_flg = True
-        new = 'The currently selected device id is' + id
+        new = f'The currently selected device id is {id}'
         QMessageBox.information(
             self,
             'tips',
@@ -744,7 +754,7 @@ class RootDialog(QDialog):
         :return:
         """
         if 'END' in result_str:
-            # self.ui.pushButton.setDisabled(0)
+            # self.ui.pushButton.setDisabled(False)
             return
 
         result_list = result_str.split('\n')
@@ -752,8 +762,7 @@ class RootDialog(QDialog):
 
         if result_list[1] == '0':
             # Perform an
-            self.control_server_Thread.ota_state_Thread.connect(
-                self.updata_ota)
+            self.control_server_Thread.ota_state_Thread.connect(self.updata_ota)
             self.control_server_Thread.start()
             return
 
@@ -764,7 +773,8 @@ class RootDialog(QDialog):
             'Send unlock failed',
             'Please check your network connection and retry.！',
             QMessageBox.Yes,
-            QMessageBox.Yes)
+            QMessageBox.Yes
+        )
 
     def getText(self):
         """
