@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module is full of dialog code(Are all based on QDialog)
 class:
@@ -10,14 +9,20 @@ class:
     myDialog: A simple dialog box example
     MainWindow: Used for debugging dialogs
 """
-import sys
-import socket
 import hashlib
-from PySide2.QtCore import *
-from PySide2.QtWidgets import *
-from PySide2 import QtCore, QtGui, QtWidgets
-from tcp_server import SeverThreadForQT
-from lan_ewlink_api import *
+import socket
+import sys
+
+from PySide2 import QtWidgets
+from PySide2.QtCore import QDir, QRect, Qt
+from PySide2.QtGui import QFont
+from PySide2.QtWidgets import (QApplication, QButtonGroup, QDialog, QDialogButtonBox, QFileDialog,
+                               QGridLayout, QInputDialog, QLabel, QLineEdit, QMainWindow,
+                               QMessageBox, QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+                               QVBoxLayout)
+
+from code.lan_ewlink_api import ThreadForQT
+from code.tcp_server import SeverThreadForQT
 
 
 class SetTimeDialog(QDialog):
@@ -38,15 +43,15 @@ class SetTimeDialog(QDialog):
     """
 
     def __init__(self, parent=None, **reserved_vrg):
-        super(SetTimeDialog, self).__init__(parent)
-        if "min" in reserved_vrg:
-            min = str(reserved_vrg["min"])
-            sec = str(reserved_vrg["sec"])
-            pulse = reserved_vrg["pulse"]
-            sec_sta = reserved_vrg["sec_sta"]
+        super().__init__(parent)
+        if 'min' in reserved_vrg:
+            min = str(reserved_vrg['min'])
+            sec = str(reserved_vrg['sec'])
+            pulse = reserved_vrg['pulse']
+            sec_sta = reserved_vrg['sec_sta']
         else:
-            min = "59"
-            sec = "59"
+            min = '59'
+            sec = '59'
             sec_sta = True
             pulse = True
         # Sets the title and size of the dialog box
@@ -73,11 +78,11 @@ class SetTimeDialog(QDialog):
         grid.addWidget(self.rb01, 0, 0, 1, 1)
         grid.addWidget(self.rb02, 0, 1, 1, 1)
 
-        grid.addWidget(QLabel(u'mins(number)', parent=self), 1, 0, 1, 1)
+        grid.addWidget(QLabel('mins(number)', parent=self), 1, 0, 1, 1)
         self.minute = QLineEdit(parent=self)
         self.minute.setText(min)
         grid.addWidget(self.minute, 1, 1, 1, 1)
-        grid.addWidget(QLabel(u'sces(number)', parent=self), 2, 0, 1, 1)
+        grid.addWidget(QLabel('sces(number)', parent=self), 2, 0, 1, 1)
         self.second = QLineEdit(parent=self)
         self.second.setText(sec)
         grid.addWidget(self.second, 2, 1, 1, 1)
@@ -99,12 +104,10 @@ class SetTimeDialog(QDialog):
 
         grid.addWidget(
             QLabel(
-                u'Inching duration range is 0:0.5 ~ 59:59.5\n with the interval of 0.5 sec.',
-                parent=self),
-            4,
-            0,
-            2,
-            2)
+                'Inching duration range is 0:0.5 ~ 59:59.5\n'
+                'with the interval of 0.5 sec.',
+                parent=self), 4, 0, 2, 2
+        )
         # Create ButtonBox, and the user confirms and cancels
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)  # Set to horizontal
@@ -130,21 +133,21 @@ class SetTimeDialog(QDialog):
         Process radio check boxes
         :return:
         """
-        print("sender")
+        print('sender')
         if self.bg0.checkedId() == 11:
-            print("11")
+            print('11')
             self.set_sta = True
         elif self.bg0.checkedId() == 12:
-            print("12")
+            print('12')
             self.set_sta = False
         else:
             # self.info1 = False
             pass
         if self.bg1.checkedId() == 21:
-            print("21")
+            print('21')
             self.second_point = True
         elif self.bg1.checkedId() == 22:
-            print("22")
+            print('22')
             self.second_point = False
         else:
             self.second_point = False
@@ -170,7 +173,7 @@ class SetTimeDialog(QDialog):
         """
         input_min = self.minute.text()
         input_sec = self.second.text()
-        if (input_sec.isdigit())and(input_min.isdigit()):
+        if input_sec.isdigit() and input_min.isdigit():
             min = int(input_min)
             sec = int(input_sec)
             print(min, sec)
@@ -179,9 +182,10 @@ class SetTimeDialog(QDialog):
                 all_time += 500
             if not (499 < all_time < 3600000):
                 all_time = 0
-        else:
-            return 0
-        return all_time
+
+            return all_time
+
+        return 0
 
 
 class WIFIDialog(QDialog):
@@ -190,7 +194,7 @@ class WIFIDialog(QDialog):
     """
 
     def __init__(self, parent=None):
-        super(WIFIDialog, self).__init__(parent)
+        super().__init__(parent)
         # Sets the title and size of the dialog box
         self.setWindowTitle('Connect to a new WIFI')
         self.resize(200, 100)
@@ -199,23 +203,22 @@ class WIFIDialog(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         # Table layout used to layout QLabel and QLineEdit and QSpinBox
         grid = QGridLayout()
-        grid.addWidget(QLabel(u'SSID', parent=self), 0, 0, 1, 1)
+        grid.addWidget(QLabel('SSID', parent=self), 0, 0, 1, 1)
         self.SSIDName = QLineEdit(parent=self)
-        self.SSIDName.setText("SSID")
+        self.SSIDName.setText('SSID')
         grid.addWidget(self.SSIDName, 0, 1, 1, 1)
-        grid.addWidget(QLabel(u'password', parent=self), 1, 0, 1, 1)
+        grid.addWidget(QLabel('password', parent=self), 1, 0, 1, 1)
         self.WIFIpassword = QLineEdit(parent=self)
-        self.WIFIpassword.setText("password")
+        self.WIFIpassword.setText('password')
         grid.addWidget(self.WIFIpassword, 1, 1, 1, 1)
         grid.addWidget(
             QLabel(
-                u'Please enter the SSID and password of the new wifi your device will connect.After connected,\n the '
-                u'device will no longer be on this LAN and info in the list will be refreshed in 5 mins.',
-                parent=self),
-            2,
-            0,
-            2,
-            2)
+                'Please enter the SSID and password of the new wifi your '
+                'device will connect.After connected,\n'
+                'the device will no longer be on this LAN and info in the list '
+                'will be refreshed in 5 mins.',
+                parent=self
+            ), 2, 0, 2, 2)
         # Create ButtonBox, and the user confirms and cancels
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)
@@ -248,7 +251,7 @@ class WIFIDialog(QDialog):
         return self.WIFIpassword.text()
 
 
-class resultDialog(QDialog):
+class ResultDialog(QDialog):
     """
     Result dialog box, Used to display the results after execution
     __init__(**info)
@@ -257,9 +260,9 @@ class resultDialog(QDialog):
     """
 
     def __init__(self, parent=None, **info):
-        super(resultDialog, self).__init__(parent)
-        print("后：%s" % str(info["info"]))
-        all_info = info["info"]
+        super().__init__(parent)
+        all_info = info['info']
+        print(f'Rear：{all_info}')
         self.setWindowTitle('result')
         self.resize(200, 100)
         self.setWindowModality(Qt.ApplicationModal)
@@ -272,9 +275,9 @@ class resultDialog(QDialog):
             sub_ret = QLabel(parent=self)
             data = all_info[x]
             if data['error'] == 0:
-                sub_ret.setText("succeed")
+                sub_ret.setText('succeed')
             else:
-                sub_ret.setText("error")
+                sub_ret.setText('error')
             grid.addWidget(sub_ret, num, 1, 1, 1)
             sub_info = QLabel(parent=self)
             sub_info.setText(str(all_info[x]))
@@ -283,25 +286,29 @@ class resultDialog(QDialog):
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)
         buttonbox.setStandardButtons(
-            QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+            QDialogButtonBox.Cancel | QDialogButtonBox.Ok
+        )
         buttonbox.accepted.connect(self.accept)
         buttonbox.rejected.connect(self.reject)
         layout = QVBoxLayout()
         layout.addLayout(grid)
         spacerItem = QSpacerItem(
-            20, 48, QSizePolicy.Minimum, QSizePolicy.Expanding)
+            20, 48,
+            QSizePolicy.Minimum,
+            QSizePolicy.Expanding
+        )
         layout.addItem(spacerItem)
         layout.addWidget(buttonbox)
         self.setLayout(layout)
 
 
-class myDialog(QDialog):
+class MyDialog(QDialog):
     """
     An example of a dialog box
     """
 
     def __init__(self, parent=None):
-        super(myDialog, self).__init__(parent)
+        super().__init__(parent)
         # Sets the title and size of the dialog box
         self.setWindowTitle('myDialog')
         self.resize(200, 100)
@@ -310,15 +317,15 @@ class myDialog(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         # Table layout used to layout QLabel and QLineEdit and QSpinBox
         grid = QGridLayout()
-        grid.addWidget(QLabel(u'SSID', parent=self), 0, 0, 1, 1)
+        grid.addWidget(QLabel('SSID', parent=self), 0, 0, 1, 1)
         self.SSIDName = QLineEdit(parent=self)
-        self.SSIDName.setText("wifi")
+        self.SSIDName.setText('wifi')
         grid.addWidget(self.SSIDName, 0, 1, 1, 1)
-        grid.addWidget(QLabel(u'password', parent=self), 1, 0, 1, 1)
+        grid.addWidget(QLabel('password', parent=self), 1, 0, 1, 1)
         self.WIFIpassword = QLineEdit(parent=self)
-        self.WIFIpassword.setText("password")
+        self.WIFIpassword.setText('password')
         grid.addWidget(self.WIFIpassword, 1, 1, 1, 1)
-        grid.addWidget(QLabel(u'password', parent=self), 2, 0, 2, 2)
+        grid.addWidget(QLabel('password', parent=self), 2, 0, 2, 2)
         # Create ButtonBox, and the user confirms and cancels
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)
@@ -332,7 +339,10 @@ class myDialog(QDialog):
         layout.addLayout(grid)
         # Put a space object to beautify the layout
         spacerItem = QSpacerItem(
-            20, 48, QSizePolicy.Minimum, QSizePolicy.Expanding)
+            20, 48,
+            QSizePolicy.Minimum,
+            QSizePolicy.Expanding
+        )
         layout.addItem(spacerItem)
         # ButtonBox
         layout.addWidget(buttonbox)
@@ -353,14 +363,14 @@ class RootDialog(QDialog):
     """
 
     def __init__(self, parent=None, **ccs):
-        super(RootDialog, self).__init__(parent)
+        super().__init__(parent)
         self.file_flg = False
         self.dev_flg = False
         print(str(ccs))
-        if "b" not in ccs:
+        if 'b' not in ccs:
             self.all_sub = []
         else:
-            self.all_sub = ccs["b"]
+            self.all_sub = ccs['b']
         # Sets the title and size of the dialog box
         self.setWindowTitle('Root')
         self.resize(445, 302)
@@ -369,69 +379,71 @@ class RootDialog(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         # Table layout used to layout QLabel and QLineEdit and QSpinBox
         self.gridLayoutWidget = QtWidgets.QWidget(self)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(10, 1, 431, 291))
-        self.gridLayoutWidget.setObjectName("gridLayoutWidget")
+        self.gridLayoutWidget.setGeometry(QRect(10, 1, 431, 291))
+        self.gridLayoutWidget.setObjectName('gridLayoutWidget')
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setVerticalSpacing(6)
-        self.gridLayout.setObjectName("gridLayout")
+        self.gridLayout.setObjectName('gridLayout')
         self.lineEdit_firmware = QtWidgets.QLineEdit(self.gridLayoutWidget)
-        self.lineEdit_firmware.setObjectName("lineEdit_firmware")
+        self.lineEdit_firmware.setObjectName('lineEdit_firmware')
         self.gridLayout.addWidget(self.lineEdit_firmware, 1, 1, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout.setObjectName('horizontalLayout')
         self.pB_OK = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.pB_OK.setObjectName("pB_OK")
+        self.pB_OK.setObjectName('pB_OK')
         self.horizontalLayout.addWidget(self.pB_OK)
         self.pB_Cencel = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.pB_Cencel.setObjectName("pB_Cencel")
+        self.pB_Cencel.setObjectName('pB_Cencel')
         self.horizontalLayout.addWidget(self.pB_Cencel)
         self.gridLayout.addLayout(self.horizontalLayout, 5, 1, 1, 2)
         self.root_progressBar = QtWidgets.QProgressBar(self.gridLayoutWidget)
-        self.root_progressBar.setProperty("value", 0)
-        self.root_progressBar.setObjectName("root_progressBar")
+        self.root_progressBar.setProperty('value', 0)
+        self.root_progressBar.setObjectName('root_progressBar')
         self.gridLayout.addWidget(self.root_progressBar, 6, 1, 1, 2)
         self.pB_import_firmware = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.pB_import_firmware.setObjectName("pB_import_firmware")
+        self.pB_import_firmware.setObjectName('pB_import_firmware')
         self.gridLayout.addWidget(self.pB_import_firmware, 1, 2, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.label_3.setObjectName("label_3")
+        self.label_3.setObjectName('label_3')
         self.gridLayout.addWidget(self.label_3, 4, 0, 1, 1)
         self.label = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.label.setObjectName("label")
+        self.label.setObjectName('label')
         self.gridLayout.addWidget(self.label, 1, 0, 1, 1)
         self.label_4 = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.label_4.setObjectName("label_4")
+        self.label_4.setObjectName('label_4')
         self.gridLayout.addWidget(self.label_4, 6, 0, 1, 1)
         self.textBrowser = QtWidgets.QTextBrowser(self.gridLayoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Preferred,
-            QtWidgets.QSizePolicy.Preferred)
+            QtWidgets.QSizePolicy.Preferred
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(
-            self.textBrowser.sizePolicy().hasHeightForWidth())
+            self.textBrowser.sizePolicy().hasHeightForWidth()
+        )
         self.textBrowser.setSizePolicy(sizePolicy)
-        self.textBrowser.setObjectName("textBrowser")
+        self.textBrowser.setObjectName('textBrowser')
         self.gridLayout.addWidget(self.textBrowser, 4, 1, 1, 2)
         self.label_2 = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.label_2.setObjectName("label_2")
+        self.label_2.setObjectName('label_2')
         self.gridLayout.addWidget(self.label_2, 2, 0, 1, 1)
         self.pB_get_device = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.pB_get_device.setObjectName("pB_get_device")
+        self.pB_get_device.setObjectName('pB_get_device')
         self.gridLayout.addWidget(self.pB_get_device, 2, 2, 1, 1)
         self.cBox_Dev = QtWidgets.QComboBox(self.gridLayoutWidget)
-        self.cBox_Dev.setObjectName("cBox_Dev")
+        self.cBox_Dev.setObjectName('cBox_Dev')
         self.gridLayout.addWidget(self.cBox_Dev, 2, 1, 1, 1)
         self.label_5 = QtWidgets.QLabel(self.gridLayoutWidget)
-        font = QtGui.QFont()
+        font = QFont()
         font.setPointSize(14)
         self.label_5.setFont(font)
-        self.label_5.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_5.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_5.setObjectName("label_5")
+        self.label_5.setLayoutDirection(Qt.LeftToRight)
+        self.label_5.setAlignment(Qt.AlignCenter)
+        self.label_5.setObjectName('label_5')
         self.gridLayout.addWidget(self.label_5, 0, 0, 1, 3)
-        self.retranslateUi()
+        self.retranslate_ui()
         self.fresh_box()
         # Connect the signal to the slot
         self.cBox_Dev.currentIndexChanged.connect(self.select_port)
@@ -439,44 +451,72 @@ class RootDialog(QDialog):
         self.pB_import_firmware.clicked.connect(self.choose_img)
         self.pB_OK.clicked.connect(self.start_root)
         self.pB_Cencel.clicked.connect(self.reject)
+        self.myThread = None
+        self.control_server_Thread = None
+        self.img_sha256 = None
 
-    def retranslateUi(self):
-        self.setWindowTitle(QtWidgets.QApplication.translate(
-            "Dialog", "DIY Flash Firmware TOOL", None, -1))
+    def retranslate_ui(self):
+        self.setWindowTitle(
+            QtWidgets.QApplication.translate(
+                'Dialog', 'DIY Flash Firmware TOOL', None, -1
+            )
+        )
         self.pB_OK.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "OK", None, -1))
+                'Dialog', 'OK', None, -1
+            )
+        )
         self.pB_Cencel.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Cancel", None, -1))
+                'Dialog', 'Cancel', None, -1
+            )
+        )
         self.pB_import_firmware.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Import firmware", None, -1))
+                'Dialog', 'Import firmware', None, -1
+            )
+        )
         self.label_3.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", " Warning ", None, -1))
+                'Dialog', ' Warning ', None, -1
+            )
+        )
         self.label.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Firmware", None, -1))
+                'Dialog', 'Firmware', None, -1
+            )
+        )
         self.label_4.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Progress", None, -1))
+                'Dialog', 'Progress', None, -1
+            )
+        )
         self.textBrowser.setHtml(
             QtWidgets.QApplication.translate(
-                "Dialog", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                "p, li { white-space: pre-wrap; }\n"
-                "</style></head><body style=\" font-family:\'SimSun\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-                "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:11pt;\">Flashing firmware will void your warranty.By clicking \'OK\',you accept voiding the warranty on this device. To avoid bricking, do not power off,restart the device,disconnect it from network, restart LAN router, change IP or port on your PC or close this program during installation. </span></p></body></html>", None, -1))
+                'Dialog',
+                'Flashing firmware will void your warranty.By clicking \'OK\','
+                'you accept voiding the warranty on this device. To avoid'
+                'bricking, do not power off, restart the device, disconnect it'
+                'from network, restart LAN router, change IP or port on your PC'
+                'or close this program during installation.',
+                None, -1
+            )
+        )
         self.label_2.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Device", None, -1))
+                'Dialog', 'Device', None, -1
+            )
+        )
         self.pB_get_device.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "Flash device list", None, -1))
+                'Dialog', 'Flash device list', None, -1
+            )
+        )
         self.label_5.setText(
             QtWidgets.QApplication.translate(
-                "Dialog", "DIY Flash Firmware TOOL", None, -1))
+                'Dialog', 'DIY Flash Firmware TOOL', None, -1
+            )
+        )
 
     def fresh_box(self):
         """
@@ -488,13 +528,15 @@ class RootDialog(QDialog):
         print(self.all_sub)
         if len(self.all_sub) <= 0:
             QMessageBox.critical(
-                "Unable to find device, please exit retry", 10000)
-            print("Unable to find device, please exit retry")
+                'Unable to find device, please exit retry', 10000
+            )
+            print('Unable to find device, please exit retry')
         else:
             for x in self.all_sub:
                 self.cBox_Dev.addItems([x])
 
-    def check_port(self):
+    @staticmethod
+    def check_port():
         """
         Test which ports are available[80, 1080, 8888, 6666, 9999]
         :return: (int)Available ports
@@ -505,9 +547,9 @@ class RootDialog(QDialog):
             result = sock.connect_ex(('127.0.0.1', index))
             sock.close()
             if result == 0:
-                print("Port %d is open" % index)
+                print(f'Port {index:d} is open')
             else:
-                print("Port %d is not open" % index)
+                print(f'Port {index:d} is not open')
                 return index
         return 0
 
@@ -517,7 +559,7 @@ class RootDialog(QDialog):
                 Select the firmware, copy the user's firmware to the current working directory,
                 and calculate the SHA256 value of the file, and verify whether the file is Dout,
                 and the firmware size is less than 508k,
-                and whether it is a ".bin "file
+                and whether it is a '.bin' file
         :return:
         """
         dlg = QFileDialog()
@@ -525,40 +567,43 @@ class RootDialog(QDialog):
         dlg.setFilter(QDir.Files)
         if dlg.exec_():
             filenames = dlg.selectedFiles()
-            imgfile = filenames[0]
+            img_file = filenames[0]
             self.lineEdit_firmware.clear()
-            # whether it is a ".bin "file
-            if ".bin" not in imgfile:
+            # whether it is a '.bin' file
+            if '.bin' not in img_file:
                 QMessageBox.information(
                     self,
-                    "ERROR",
-                    "The firmware selected is not a bin file",
+                    'ERROR',
+                    'The firmware selected is not a bin file',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
                 return
-            #
-            if self.get_file_to_work(imgfile):
+
+            if self.get_file_to_work(img_file):
                 try:
-                    with open("itead.bin", 'rb') as file_obj:
+                    with open('itead.bin', 'rb') as file_obj:
                         self.img = file_obj.read()
                         print(type(self.img))
                         print(len(self.img))
                         sha256 = hashlib.sha256(self.img)
-                        self.imgsha256 = sha256.hexdigest()
-                        print(self.imgsha256)
-                        self.lineEdit_firmware.setText(imgfile)
+                        self.img_sha256 = sha256.hexdigest()
+                        print(self.img_sha256)
+                        self.lineEdit_firmware.setText(img_file)
                         self.file_flg = True
                 except BaseException:
-                    print("unknown err")
+                    print('unknown err')
             else:
                 QMessageBox.information(
                     self,
-                    "ERROR",
-                    "Firmware file cannot be greater than 508k; The firmware must be Dout",
+                    'ERROR',
+                    'Firmware file cannot be greater than 508k; The firmware must be Dout',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
 
-    def get_file_to_work(self, bin_file):
+    @staticmethod
+    def get_file_to_work(bin_file):
         """
         calculate the SHA256 value of the file, and verify whether the file is Dout,
         and the firmware size is less than 508k,
@@ -566,16 +611,18 @@ class RootDialog(QDialog):
         try:
             with open(bin_file, 'rb') as file_obj:
                 b = bytearray(file_obj.read())
-                if (b[2] == 3)and(len(b) < 508000):
+                if (b[2] == 3) and (len(b) < 508000):
                     file_obj.seek(0, 0)
                     img = file_obj.read()
                 else:
                     return False
         except BaseException:
-            print("unknown err")
+            print('unknown err')
             return False
-        bin_obj = open("itead.bin", 'wb')
-        bin_obj.write(img)
+
+        with open('itead.bin', 'wb') as bin_obj:
+            bin_obj.write(img)
+
         return True
 
     def select_port(self):
@@ -587,13 +634,14 @@ class RootDialog(QDialog):
         if len(id) <= 1:
             return
         self.dev_flg = True
-        new = "The currently selected device id is" + id
+        new = 'The currently selected device id is' + id
         QMessageBox.information(
             self,
-            "tips",
+            'tips',
             new,
             QMessageBox.Yes,
-            QMessageBox.Yes)
+            QMessageBox.Yes
+        )
         self.sub_id = [id]
 
     def start_root(self):
@@ -601,33 +649,35 @@ class RootDialog(QDialog):
         if not self.file_flg:
             QMessageBox.information(
                 self,
-                "Insufficient conditions",
-                "Missing firmware file！",
+                'Insufficient conditions',
+                'Missing firmware file！',
                 QMessageBox.Yes,
-                QMessageBox.Yes)
+                QMessageBox.Yes
+            )
             return
         if not self.dev_flg:
             QMessageBox.information(
                 self,
-                "Insufficient conditions",
-                "No device selected yet！",
+                'Insufficient conditions',
+                'No device selected yet！',
                 QMessageBox.Yes,
-                QMessageBox.Yes)
+                QMessageBox.Yes
+            )
             return
         # Create a QT thread to transfer firmware to the device
-        myport = self.check_port()
-        myaddr = self.get_dev_ip_for_lan()
-        # print("Host information：",myname,myaddr,str(myport))
-        print("Server initialization complete")
+        my_port = self.check_port()
+        my_addr = self.get_dev_ip_for_lan()
+        print('Server initialization complete')
         self.control_server_Thread = SeverThreadForQT(
-            server_port=myport, server_ip=myaddr)
+            server_port=my_port, server_ip=my_addr
+        )
         # Lock button
-        self.pB_get_device.setDisabled(1)
-        self.pB_import_firmware.setDisabled(1)
-        self.pB_OK.setDisabled(1)
-        self.pB_Cencel.setDisabled(1)
+        self.pB_get_device.setDisabled(True)
+        self.pB_import_firmware.setDisabled(True)
+        self.pB_OK.setDisabled(True)
+        self.pB_Cencel.setDisabled(True)
         # Send an unlocked device upgrade
-        self.send_unlock(self.sub_id, self.imgsha256, myaddr, myport)
+        self.send_unlock(self.sub_id, self.img_sha256, my_addr, my_port)
 
     def get_host_ip(self):
         """
@@ -635,15 +685,12 @@ class RootDialog(QDialog):
         :return: ip
         """
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(('8.8.8.8', 80))
-            ip = s.getsockname()[0]
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(('8.8.8.8', 80))
+                ip = s.getsockname()[0]
+            return ip
         except BaseException:
-            s.close()
             return self.getText()
-        finally:
-            s.close()
-        return ip
 
     def get_dev_ip_for_lan(self):
         """
@@ -654,10 +701,13 @@ class RootDialog(QDialog):
             myname = socket.getfqdn(socket.gethostname())
             myaddr = socket.gethostbyname_ex(myname)
             print(myaddr)
+
             all_adds = myaddr[2]
-            print("self.all_sub", self.all_sub)
+            print('self.all_sub', self.all_sub)
+
             sub_info = self.all_sub[self.sub_id[0]]
-            sub_ip = sub_info["ip"]
+            sub_ip = sub_info['ip']
+
             for x in all_adds:
                 print(x)
                 if x[:10] in sub_ip[:10]:
@@ -675,19 +725,15 @@ class RootDialog(QDialog):
         :param sever_port: Server port
         :return:
         """
-        print("unlock SUB：", sub_id)
-        dicta = {"info": self.all_sub, "select_name_list": sub_id}
-        pass
-        dicta["command_num"] = 7
-        vrg = {}
-        command_vrg = {}
-        pass
-        command_vrg["sha256sum"] = sha256
-        command_vrg["sever_ip"] = sever_ip
-        command_vrg["sever_port"] = sever_port
-        vrg["command_vrg"] = command_vrg
-        dicta["command_vrg"] = vrg
-        self.myThread = ThreadForQT(parent=None, **dicta)
+        print('unlock SUB：', sub_id)
+        dicta = dict(info=self.all_sub, select_name_list=sub_id, command_num=7)
+
+        command_vrg = dict(
+            sha256sum=sha256, sever_ip=sever_ip, sever_port=sever_port
+        )
+
+        dicta['command_vrg'] = dict(command_vrg=command_vrg)
+        self.myThread = ThreadForQT(**dicta)
         self.myThread.run_test_Thread.connect(self.do_unlock_result)
         self.myThread.start()
 
@@ -697,25 +743,28 @@ class RootDialog(QDialog):
         :param result_str: Unlock the message sent by the thread
         :return:
         """
-        if "END" in result_str:
+        if 'END' in result_str:
             # self.ui.pushButton.setDisabled(0)
             return
-        result_list = result_str.split("\n")
-        print("The return value is received：", result_list)
-        if result_list[1] is "0":
+
+        result_list = result_str.split('\n')
+        print('The return value is received：', result_list)
+
+        if result_list[1] == '0':
             # Perform an
             self.control_server_Thread.ota_state_Thread.connect(
                 self.updata_ota)
             self.control_server_Thread.start()
-        else:
-            # Send unlocking failure (prompt for network connection)(close the
-            # server)
-            QMessageBox.information(
-                self,
-                "Send unlock failed",
-                "Please check your network connection and retry.！",
-                QMessageBox.Yes,
-                QMessageBox.Yes)
+            return
+
+        # Send unlocking failure (prompt for network connection)(close the
+        # server)
+        QMessageBox.information(
+            self,
+            'Send unlock failed',
+            'Please check your network connection and retry.！',
+            QMessageBox.Yes,
+            QMessageBox.Yes)
 
     def getText(self):
         """
@@ -724,7 +773,8 @@ class RootDialog(QDialog):
         :return: str The IP address entered by the user
         """
         text, okPressed = QInputDialog.getText(
-            self, "not find ip ", "Your PC ip:", QLineEdit.Normal, "")
+            self, 'not find ip ', 'Your PC ip:', QLineEdit.Normal, ''
+        )
         if okPressed and text != '':
             print(text)
             return text
@@ -735,76 +785,86 @@ class RootDialog(QDialog):
         :param result_new: Message from the server thread
         :return:
         """
-        result_vrg = result_new.split("\n")
+        result_vrg = result_new.split('\n')
         print(result_vrg)
-        result_num = int(result_vrg[2].split(".")[0])
-        if "get" in result_vrg:
-            self.root_progressBar.setProperty("value", result_num)
-        elif "post" in result_vrg:
-            print("The return value is received：", str(result_num))
-            self.pB_get_device.setDisabled(0)
-            self.pB_import_firmware.setDisabled(0)
-            self.pB_OK.setDisabled(0)
-            self.pB_Cencel.setDisabled(0)
+        result_num = int(result_vrg[2].split('.')[0])
+        if 'get' in result_vrg:
+            self.root_progressBar.setProperty('value', result_num)
+        elif 'post' in result_vrg:
+            print('The return value is received：', str(result_num))
+            self.pB_get_device.setDisabled(False)
+            self.pB_import_firmware.setDisabled(False)
+            self.pB_OK.setDisabled(False)
+            self.pB_Cencel.setDisabled(False)
+
             if result_num == 0:
                 # Prompt upgrade successful
                 QMessageBox.information(
                     self,
-                    "Data sent successfully",
-                    "Please wait for the device to restart.\nDo not power off or restart the device manually, \
-                    but you may close this window now. ",
+                    'Data sent successfully',
+                    'Please wait for the device to restart.\n'
+                    'Do not power off or restart the device manually, '
+                    'but you may close this window now. ',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
             elif result_num == 1:
                 # Prompt upgrade failed
                 QMessageBox.information(
                     self,
-                    "error",
-                    "Please wait for the device to restart！",
+                    'error',
+                    'Please wait for the device to restart！',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
             elif result_num == 404:
                 # Prompt upgrade failed
                 QMessageBox.information(
                     self,
-                    "error",
-                    "Data download error 404！",
+                    'error',
+                    'Data download error 404！',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
             elif result_num == 406:
                 # Prompt upgrade failed
                 QMessageBox.information(
                     self,
-                    "error",
-                    "Upgrade failed！",
+                    'error',
+                    'Upgrade failed！',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
             elif result_num == 409:
                 # Prompt upgrade failed
                 QMessageBox.information(
                     self,
-                    "error",
-                    "Data verification failed！",
+                    'error',
+                    'Data verification failed！',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
+                    QMessageBox.Yes
+                )
             elif result_num == 410:
                 # Prompt upgrade failed
                 QMessageBox.information(
                     self,
-                    "error",
-                    "Device error！",
+                    'error',
+                    'Device error！',
                     QMessageBox.Yes,
-                    QMessageBox.Yes)
-        elif "ERR" in result_vrg:
-            self.pB_Cencel.setDisabled(0)
+                    QMessageBox.Yes
+                )
+        elif 'ERR' in result_vrg:
+            self.pB_Cencel.setDisabled(False)
             QMessageBox.information(
                 self,
-                "!!!!!!!!!!",
-                "Please make sure the connection between the device and your PC is working correctly.\
-                (Don\'t power off or restart the device, close the upgrade window, or change the IP \
-                or port on your PC)！",
+                '!!!!!!!!!!',
+                'Please make sure the connection between the device and your PC '
+                'is working correctly.\n'
+                '(Don\'t power off or restart the device, close the upgrade '
+                'window, or change the IP \n or port on your PC)！',
                 QMessageBox.Yes,
-                QMessageBox.Yes)
+                QMessageBox.Yes
+            )
 
 
 class MainWindow(QMainWindow):
@@ -813,10 +873,11 @@ class MainWindow(QMainWindow):
     """
 
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+        super().__init__(parent)
         # Sets the title and size of the main window
         self.setWindowTitle('The main window')
         self.resize(400, 300)
+        self.dialog = None
         # Create button
         self.btn = QPushButton(self)
         self.btn.setText('Popup dialog')
@@ -824,7 +885,7 @@ class MainWindow(QMainWindow):
         self.btn.clicked.connect(self.show_dialog1)
 
     def show_dialog1(self):
-        all_dev = ["First", "second", "third", "more"]
+        all_dev = ['First', 'second', 'third', 'more']
         self.dialog = RootDialog(b=all_dev)
         self.dialog.show()
         ret = self.dialog.exec_()
@@ -834,7 +895,7 @@ class MainWindow(QMainWindow):
             print(self.dialog.password())
         self.dialog.destroy()
 
-    def show_WIFIDialog(self):
+    def show_wifi_dialog(self):
         self.dialog = WIFIDialog()
         self.dialog.show()
         ret = self.dialog.exec_()
@@ -848,7 +909,7 @@ class MainWindow(QMainWindow):
         self.dialog = SetTimeDialog()
         self.dialog.show()
         ret = self.dialog.exec_()
-        print("ret:", ret)
+        print('ret:', ret)
         if ret:
             print(self.dialog.all_time())
         self.dialog.destroy()
