@@ -39,8 +39,7 @@ class MainWindow(QMainWindow):
         # The name of the device selected by the user
         self.select_name = []
         # One thread is dedicated to MDNS information
-        self.BrowserThread = mDNS_BrowserThread(
-            parent=None, func_task=self.mDNS_info_sta)
+        self.BrowserThread = mDNS_BrowserThread(func_task=self.mDNS_info_sta)
         # Sets the signal tube correlation function
         self.BrowserThread.get_sub_new.connect(self.thread_deal_mDNS_new)
         self.BrowserThread.start()

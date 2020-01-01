@@ -4,7 +4,7 @@
         SeverThreadForQT:(Based on QThread)
 """
 import json
-from socket import *
+from socket import SO_REUSEADDR, socket, SOL_SOCKET
 
 from PySide2.QtCore import QThread, Signal
 

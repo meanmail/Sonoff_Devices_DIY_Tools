@@ -106,7 +106,7 @@ class ThreadForQT(QThread):
     run_test_Thread = Signal(str)
 
     def __init__(self, parent=None, **func_task):
-        super(ThreadForQT, self).__init__(parent)
+        super().__init__(parent)
         # Device information (deviceID IP PORT)
         print('func_task', str(func_task))
 
