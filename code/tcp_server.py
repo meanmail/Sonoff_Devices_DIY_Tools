@@ -5,6 +5,7 @@
 """
 import json
 from socket import SO_REUSEADDR, socket, SOL_SOCKET
+from typing import List
 
 from PySide2.QtCore import QThread, Signal
 
@@ -19,7 +20,7 @@ class SeverThreadForQT(QThread):
     """
     ota_state_Thread = Signal(str)
 
-    def __init__(self, parent=None, **func_task):
+    def __init__(self, parent=None, **func_task) -> None:
         super().__init__(parent)
         HOST = func_task['server_ip']
         PORT = func_task['server_port']
@@ -32,10 +33,10 @@ class SeverThreadForQT(QThread):
         self.connfd = None
         self.img = None
 
-    def __def__(self):
+    def __def__(self) -> None:
         self.wait()
 
-    def run(self):
+    def run(self) -> None:
         self.sockfd.listen(5)
         # The loop waits for the client link
         while True:
@@ -54,9 +55,9 @@ class SeverThreadForQT(QThread):
                     print('len ：', str(len(data)))
                     print(f'Receive ：{data}')
                     if 'GET' in data:
-                        self.do_GET(data)
+                        self.do_get(data)
                     elif 'POST' in data:
-                        self.do_POST(data)
+                        self.do_post(data)
                         return
                     else:
                         print('The client sends an error instruction')
@@ -64,7 +65,7 @@ class SeverThreadForQT(QThread):
                     self.ota_state_Thread.emit('ERR\n\n0')
                     break
 
-    def count_bin_len(self):
+    def count_bin_len(self) -> None:
         """
         Calculate the size of the firmware
         :return: None
@@ -73,7 +74,7 @@ class SeverThreadForQT(QThread):
             img = file_obj.read()
             self.bin_len = len(img)
 
-    def do_GET(self, data):
+    def do_get(self, data) -> None:
         print('Handle GET requests for devices')
         # Find the digital segment after 'bytes='
         all_read = self.get_range_bytes(data)
@@ -105,14 +106,14 @@ class SeverThreadForQT(QThread):
         print(get_new)
         self.ota_state_Thread.emit(get_new)
 
-    def check_finish(self, end_seek):
+    def check_finish(self, end_seek: int) -> None:
         self.send_over_flg = (self.bin_len - 1) == end_seek
 
-    def my_send_head(self, data):
+    def my_send_head(self, data) -> None:
         self.connfd.send(bytes(data, 'ASCII'))
 
     @staticmethod
-    def get_range_bytes(re_data):
+    def get_range_bytes(re_data) -> List[int]:
         print(re_data, type(re_data), len(re_data))
         start_index = re_data.find('bytes') + 6
         data_f = re_data[start_index:].splitlines()
@@ -120,7 +121,7 @@ class SeverThreadForQT(QThread):
         print('Starting position：', start_read, 'End position：', end_read)
         return [int(start_read), int(end_read)]
 
-    def do_POST(self, data):
+    def do_post(self, data) -> None:
         print('post:', data)
         json_data = json.loads(self.find_post_json(data))
         print('json_data', json_data)
@@ -160,7 +161,7 @@ class SeverThreadForQT(QThread):
             print('Internal error of equipment')
 
     @staticmethod
-    def find_post_json(data):
+    def find_post_json(data) -> str:
         """
         Find the json data in the data section
         :param data:Data to look up
@@ -176,7 +177,7 @@ class SeverThreadForQT(QThread):
             return 'error data pool'
         return data[json_sta_index:json_end_index + 1]
 
-    def updata_get_rata(self, new_seek):
+    def updata_get_rata(self, new_seek: int) -> float:
         """
         Update firmware transfer progress
         :param new_seek:

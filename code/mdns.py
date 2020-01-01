@@ -7,26 +7,26 @@
 import time
 
 from PySide2.QtCore import QThread, Signal
-from zeroconf import ServiceBrowser, Zeroconf
+from zeroconf import ServiceBrowser, ServiceListener, Zeroconf
 
 
-class mDNS_BrowserThread(QThread):
+class MDNSBrowserThread(QThread):
     """
     This is a QT thread that gets the MDNS information and sends it to the UI
     thread via the get_sub_new signal.
     """
     get_sub_new = Signal(str)
 
-    def __init__(self, parent=None, **func_task):
+    def __init__(self, parent=None, **func_task) -> None:
         super().__init__(parent)
         self.ID_list = []
         self.zeroconf = Zeroconf()
         self.listener = MyListener()
 
-    def __def__(self):
+    def __def__(self) -> None:
         self.wait()
 
-    def run(self):
+    def run(self) -> None:
         """
         The data of the searched device is refreshed every second,
          and each update is converted into a string and sent to the interface(name ip port data)
@@ -61,7 +61,7 @@ class mDNS_BrowserThread(QThread):
             time.sleep(0.5)
 
 
-class MyListener(object):
+class MyListener(ServiceListener):
     """
     This class is used for the mDNS browsing discovery device, including
     calling the remove_service and add_service properties to ServiceBrowser,
@@ -71,13 +71,13 @@ class MyListener(object):
         [keys:info.name，val:info]
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.all_del_sub = []
         self.all_info_dict = {}
         self.all_sub_num = 0
         self.new_sub = False
 
-    def remove_service(self, zeroconf, type, name):
+    def remove_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         """
         This function is called for ServiceBrowser.
         This function is triggered when ServiceBrowser discovers that some
@@ -92,7 +92,7 @@ class MyListener(object):
         print('self.all_info_dict[name]', self.all_info_dict)
         print(f'Service {name} removed')
 
-    def add_service(self, zeroconf, type, name):
+    def add_service(self, zeroconf: Zeroconf, type: str, name: str) -> None:
         """
         This function is called for ServiceBrowser.This function is triggered
         when ServiceBrowser finds a new device
@@ -112,7 +112,7 @@ class MyListener(object):
             self.all_del_sub.remove(name)
             print(f'Service {name} added, service info: {info}')
 
-    def flash_all_sub_info(self):
+    def flash_all_sub_info(self) -> None:
         """
         Update all found subdevice information
         """
@@ -126,21 +126,21 @@ class MyListener(object):
             self.all_info_dict[x] = current_info['info']
 
 
-def main():
+def main() -> None:
     zeroconf = Zeroconf()
     listener = MyListener()
     ServiceBrowser(zeroconf, '_ewelink._tcp.local.', listener=listener)
 
     while True:
         if listener.all_sub_num > 0:
-            dict = listener.all_info_dict.copy()
-            for x in dict.keys():
-                info = dict[x]
+            all_info_dict = listener.all_info_dict.copy()
+            for x in all_info_dict.keys():
+                info = all_info_dict[x]
                 info = zeroconf.get_service_info(info.type, x)
                 if info is not None:
                     data = info.properties
                     cur_str = (x[8:18] + '  ' +
-                               parse_address(info.address) + '  ' +
+                               parse_address(info.addresses[0]) + '  ' +
                                str(info.port) + '  ' +
                                str(data))
                     print(cur_str)
@@ -151,7 +151,7 @@ def main():
         time.sleep(0.5)
 
 
-def parse_address(address):
+def parse_address(address: bytes) -> str:
     add_list = []
     for i in range(4):
         add_list.append(int(address.hex()[(i * 2):(i + 1) * 2], 16))

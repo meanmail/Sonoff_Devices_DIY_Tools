@@ -9,17 +9,21 @@
 from PySide2 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName('MainWindow')
-        MainWindow.resize(1124, 567)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                           QtWidgets.QSizePolicy.Expanding)
+class UiMainWindow(object):
+    def setup_ui(self, main_window) -> None:
+        main_window.setObjectName('MainWindow')
+        main_window.resize(1124, 567)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding,
+            QtWidgets.QSizePolicy.Expanding
+        )
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(sizePolicy)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        sizePolicy.setHeightForWidth(
+            main_window.sizePolicy().hasHeightForWidth()
+        )
+        main_window.setSizePolicy(sizePolicy)
+        self.centralwidget = QtWidgets.QWidget(main_window)
         self.centralwidget.setObjectName('centralwidget')
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName('gridLayout')
@@ -102,16 +106,16 @@ class Ui_MainWindow(object):
         self.MODIFY_SSID_PASSWORD.setObjectName('MODIFY_SSID_PASSWORD')
         self.horizontalLayout_2.addWidget(self.MODIFY_SSID_PASSWORD)
         self.gridLayout.addLayout(self.horizontalLayout_2, 3, 0, 1, 1)
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        main_window.setCentralWidget(self.centralwidget)
+        self.statusbar = QtWidgets.QStatusBar(main_window)
         self.statusbar.setObjectName('statusbar')
-        MainWindow.setStatusBar(self.statusbar)
+        main_window.setStatusBar(self.statusbar)
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslate_ui(main_window)
+        QtCore.QMetaObject.connectSlotsByName(main_window)
 
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(
+    def retranslate_ui(self, main_window) -> None:
+        main_window.setWindowTitle(
             QtWidgets.QApplication.translate(
                 'MainWindow', 'MainWindow', None, -1
             )

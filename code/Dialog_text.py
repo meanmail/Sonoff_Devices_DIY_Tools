@@ -16,10 +16,12 @@ import sys
 from PySide2 import QtWidgets
 from PySide2.QtCore import QDir, QRect, Qt
 from PySide2.QtGui import QFont
-from PySide2.QtWidgets import (QApplication, QButtonGroup, QDialog, QDialogButtonBox, QFileDialog,
-                               QGridLayout, QInputDialog, QLabel, QLineEdit, QMainWindow,
-                               QMessageBox, QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
-                               QVBoxLayout)
+from PySide2.QtWidgets import (
+    QApplication, QButtonGroup, QDialog, QDialogButtonBox, QFileDialog,
+    QGridLayout, QInputDialog, QLabel, QLineEdit, QMainWindow,
+    QMessageBox, QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QVBoxLayout
+)
 
 from code.lan_ewlink_api import ThreadForQT
 from code.tcp_server import SeverThreadForQT
@@ -42,7 +44,7 @@ class SetTimeDialog(QDialog):
         rbclicked:
     """
 
-    def __init__(self, parent=None, **reserved_vrg):
+    def __init__(self, parent=None, **reserved_vrg) -> None:
         super().__init__(parent)
         if 'min' in reserved_vrg:
             min = str(reserved_vrg['min'])
@@ -82,7 +84,7 @@ class SetTimeDialog(QDialog):
         self.minute = QLineEdit(parent=self)
         self.minute.setText(min)
         grid.addWidget(self.minute, 1, 1, 1, 1)
-        grid.addWidget(QLabel('sces(number)', parent=self), 2, 0, 1, 1)
+        grid.addWidget(QLabel('secs(number)', parent=self), 2, 0, 1, 1)
         self.second = QLineEdit(parent=self)
         self.second.setText(sec)
         grid.addWidget(self.second, 2, 1, 1, 1)
@@ -112,7 +114,8 @@ class SetTimeDialog(QDialog):
         buttonbox = QDialogButtonBox(parent=self)
         buttonbox.setOrientation(Qt.Horizontal)  # Set to horizontal
         buttonbox.setStandardButtons(
-            QDialogButtonBox.Cancel | QDialogButtonBox.Ok)  # Ok and cancel two buttons
+            QDialogButtonBox.Cancel | QDialogButtonBox.Ok
+        )
         # Connect the signal to the slot
         buttonbox.accepted.connect(self.accept)
         buttonbox.rejected.connect(self.reject)
@@ -122,51 +125,52 @@ class SetTimeDialog(QDialog):
         layout.addLayout(grid)
         # Put a space object to beautify the layout
         spacer_item = QSpacerItem(
-            20, 48, QSizePolicy.Minimum, QSizePolicy.Expanding)
+            20, 48,
+            QSizePolicy.Minimum,
+            QSizePolicy.Expanding
+        )
         layout.addItem(spacer_item)
         # ButtonBox
         layout.addWidget(buttonbox)
         self.setLayout(layout)
 
-    def rbclicked(self):
+    def rbclicked(self) -> None:
         """
         Process radio check boxes
         :return:
         """
         print('sender')
+
         if self.bg0.checkedId() == 11:
-            print('11')
             self.set_sta = True
         elif self.bg0.checkedId() == 12:
-            print('12')
             self.set_sta = False
-        else:
-            # self.info1 = False
-            pass
+
         if self.bg1.checkedId() == 21:
-            print('21')
             self.second_point = True
         elif self.bg1.checkedId() == 22:
-            print('22')
             self.second_point = False
         else:
             self.second_point = False
 
-    def minute(self):
+        print(self.bg0.checkedId())
+        print(self.bg1.checkedId())
+
+    def minute(self) -> str:
         """
         View the number of minutes the user entered
         :return:str
         """
         return self.minute.text()
 
-    def second(self):
+    def second(self) -> str:
         """
         View the number of seconds the user entered
         :return: str
         """
         return self.second.text()
 
-    def all_time(self):
+    def all_time(self) -> int:
         """
         Calculate all times entered by the user
         :return: int (Number of milliseconds)
@@ -193,7 +197,7 @@ class WIFIDialog(QDialog):
     Let the user enter the SSID and password for wifi
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         # Sets the title and size of the dialog box
         self.setWindowTitle('Connect to a new WIFI')
@@ -238,13 +242,13 @@ class WIFIDialog(QDialog):
         layout.addWidget(buttonbox)
         self.setLayout(layout)
 
-    def name(self):
+    def name(self) -> str:
         """
         :return: (str)SSID of user input
         """
         return self.SSIDName.text()
 
-    def password(self):
+    def password(self) -> str:
         """
         :return:(str)WIFI password of user input
         """
@@ -259,7 +263,7 @@ class ResultDialog(QDialog):
 
     """
 
-    def __init__(self, parent=None, **info):
+    def __init__(self, parent=None, **info) -> None:
         super().__init__(parent)
         all_info = info['info']
         print(f'Rear：{all_info}')
@@ -307,7 +311,7 @@ class MyDialog(QDialog):
     An example of a dialog box
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         # Sets the title and size of the dialog box
         self.setWindowTitle('myDialog')
@@ -348,10 +352,10 @@ class MyDialog(QDialog):
         layout.addWidget(buttonbox)
         self.setLayout(layout)
 
-    def name(self):
+    def name(self) -> str:
         return self.SSIDName.text()
 
-    def password(self):
+    def password(self) -> str:
         return self.WIFIpassword.text()
 
 
@@ -362,7 +366,7 @@ class RootDialog(QDialog):
     2.Send the unlock command to the device
     """
 
-    def __init__(self, parent=None, **ccs):
+    def __init__(self, parent=None, **ccs) -> None:
         super().__init__(parent)
         self.file_flg = False
         self.dev_flg = False
@@ -457,7 +461,7 @@ class RootDialog(QDialog):
         self.img_sha256 = None
         self.sub_id = None
 
-    def retranslate_ui(self):
+    def retranslate_ui(self) -> None:
         self.setWindowTitle(
             QtWidgets.QApplication.translate(
                 'Dialog', 'DIY Flash Firmware TOOL', None, -1
@@ -520,7 +524,7 @@ class RootDialog(QDialog):
             )
         )
 
-    def fresh_box(self):
+    def fresh_box(self) -> None:
         """
         Refresh device options
         :return: None
@@ -538,7 +542,7 @@ class RootDialog(QDialog):
                 self.cBox_Dev.addItems([x])
 
     @staticmethod
-    def check_port():
+    def check_port() -> int:
         """
         Test which ports are available[80, 1080, 8888, 6666, 9999]
         :return: (int)Available ports
@@ -556,7 +560,7 @@ class RootDialog(QDialog):
                 return port
         return 0
 
-    def choose_img(self):
+    def choose_img(self) -> None:
         """
         Select the firmware
                 Select the firmware, copy the user's firmware to the current
@@ -610,7 +614,7 @@ class RootDialog(QDialog):
             )
 
     @staticmethod
-    def get_file_to_work(bin_file):
+    def get_file_to_work(bin_file) -> bool:
         """
         calculate the SHA256 value of the file, and verify whether the file is Dout,
         and the firmware size is less than 508k,
@@ -633,7 +637,7 @@ class RootDialog(QDialog):
 
         return True
 
-    def select_port(self):
+    def select_port(self) -> None:
         """
         Confirm the selected user
         :return:
@@ -654,7 +658,7 @@ class RootDialog(QDialog):
         )
         self.sub_id = [id]
 
-    def start_root(self):
+    def start_root(self) -> None:
         # Check if conditions are met
         if not self.file_flg:
             QMessageBox.information(
@@ -689,7 +693,7 @@ class RootDialog(QDialog):
         # Send an unlocked device upgrade
         self.send_unlock(self.sub_id, self.img_sha256, my_addr, my_port)
 
-    def get_host_ip(self):
+    def get_host_ip(self) -> str:
         """
         Query the native IP address
         :return: ip
@@ -702,7 +706,7 @@ class RootDialog(QDialog):
         except BaseException:
             return self.getText()
 
-    def get_dev_ip_for_lan(self):
+    def get_dev_ip_for_lan(self) -> str:
         """
         Query the native IP address
         :return: ip
@@ -726,7 +730,8 @@ class RootDialog(QDialog):
         except BaseException:
             return self.get_host_ip()
 
-    def send_unlock(self, sub_id, sha256, sever_ip, sever_port):
+    def send_unlock(self, sub_id: str, sha256: str,
+                    sever_ip: str, sever_port: int) -> None:
         """
         Send the unlock command to the device
         :param sub_id: The device ID number to unlock
@@ -747,7 +752,7 @@ class RootDialog(QDialog):
         self.myThread.run_test_Thread.connect(self.do_unlock_result)
         self.myThread.start()
 
-    def do_unlock_result(self, result_str):
+    def do_unlock_result(self, result_str: str) -> None:
         """
         To understand the return value of the lock instruction
         :param result_str: Unlock the message sent by the thread
@@ -776,7 +781,7 @@ class RootDialog(QDialog):
             QMessageBox.Yes
         )
 
-    def getText(self):
+    def getText(self) -> str:
         """
         When the IP address cannot be automatically obtained by the user's computer,
         the IP address will be manually entered by the user to create the server
@@ -789,7 +794,7 @@ class RootDialog(QDialog):
             print(text)
             return text
 
-    def updata_ota(self, result_new):
+    def updata_ota(self, result_new: str) -> None:
         """
         Process information for server threads
         :param result_new: Message from the server thread
@@ -882,7 +887,7 @@ class MainWindow(QMainWindow):
     Single-module debugging classes
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         # Sets the title and size of the main window
         self.setWindowTitle('The main window')
@@ -894,7 +899,7 @@ class MainWindow(QMainWindow):
         self.btn.move(50, 50)
         self.btn.clicked.connect(self.show_dialog1)
 
-    def show_dialog1(self):
+    def show_dialog1(self) -> None:
         all_dev = ['First', 'second', 'third', 'more']
         self.dialog = RootDialog(b=all_dev)
         self.dialog.show()
@@ -905,7 +910,7 @@ class MainWindow(QMainWindow):
             print(self.dialog.password())
         self.dialog.destroy()
 
-    def show_wifi_dialog(self):
+    def show_wifi_dialog(self) -> None:
         self.dialog = WIFIDialog()
         self.dialog.show()
         ret = self.dialog.exec_()
@@ -915,7 +920,7 @@ class MainWindow(QMainWindow):
             print(self.dialog.password())
         self.dialog.destroy()
 
-    def show_dialog(self):
+    def show_dialog(self) -> None:
         self.dialog = SetTimeDialog()
         self.dialog.show()
         ret = self.dialog.exec_()

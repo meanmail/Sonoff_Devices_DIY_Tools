@@ -15,18 +15,18 @@ from PySide2.QtWidgets import (QAbstractItemView, QApplication, QInputDialog, QM
 
 from code.Dialog_text import ResultDialog, RootDialog, SetTimeDialog, WIFIDialog
 from code.lan_ewlink_api import *
-from code.mdns import mDNS_BrowserThread
+from code.mdns import MDNSBrowserThread
 from code.tool_01DIY85_ui import *
 
 
 class MainWindow(QMainWindow):
     """ main window """
 
-    def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
         self.myThread = None
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        self.ui = UiMainWindow()
+        self.ui.setup_ui(self)
         self.result_ui = False
         self.thread_number = 0
         self.send_result = {}
@@ -39,7 +39,7 @@ class MainWindow(QMainWindow):
         # The name of the device selected by the user
         self.select_name = []
         # One thread is dedicated to MDNS information
-        self.BrowserThread = mDNS_BrowserThread(func_task=self.mDNS_info_sta)
+        self.BrowserThread = MDNSBrowserThread(func_task=self.mDNS_info_sta)
         # Sets the signal tube correlation function
         self.BrowserThread.get_sub_new.connect(self.thread_deal_mDNS_new)
         self.BrowserThread.start()
@@ -63,38 +63,38 @@ class MainWindow(QMainWindow):
         self.ui.pB_info.clicked.connect(self.get_info)
         self.ui.pB_signal.clicked.connect(self.get_signal)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         print('clean all')
         event.accept()
         os._exit(0)
 
-    def get_signal(self):
+    def get_signal(self) -> None:
         self.run_detection(command_num=7, b='null')
 
-    def get_info(self):
+    def get_info(self) -> None:
         self.run_detection(command_num=8, b='null')
 
-    def set_ON(self):
+    def set_ON(self) -> None:
         """Sets the device selected by the user to on"""
         self.run_detection(command_num=0, b='null')
 
-    def set_OFF(self):
+    def set_OFF(self) -> None:
         """" Sets the device selected by the user to off """
         self.run_detection(command_num=1, b='null')
 
-    def set_power_up_KEEP(self):
+    def set_power_up_KEEP(self) -> None:
         """Set “power up state out is KEEP“ of all selected devices by user ."""
         self.run_detection(command_num=2, b='null')
 
-    def set_power_up_ON(self):
+    def set_power_up_ON(self) -> None:
         """Set all devices selected by the user to [power-on-state-on]"""
         self.run_detection(command_num=3, b='null')
 
-    def set_power_up_OFF(self):
+    def set_power_up_OFF(self) -> None:
         """Set “power up state out is OFF“ of all selected devices by user ."""
         self.run_detection(command_num=4, b='null')
 
-    def set_POINT(self):
+    def set_POINT(self) -> None:
         """Set the inching time of all selected devices by user ."""
         # Check if the user has selected the device
         if len(self.select_name) <= 0:
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
         set_time_dialog.destroy()
         self.run_detection(command_num=5, command_vrg=vrg)
 
-    def set_POINT_a_sub(self, sub_id):
+    def set_POINT_a_sub(self, sub_id) -> None:
         """
         Set the inching time of all selected devices by user .
         :param sub_id: You need to set the device ID for the inching mode
@@ -146,12 +146,7 @@ class MainWindow(QMainWindow):
         all_time = sub_info['pulseWidth']
         min_time = all_time // 60000
         sec_time = all_time % 60000 // 1000
-
-        if all_time % 1000 == 500:
-            sec_sta = True
-        else:
-            sec_sta = False
-
+        sec_sta = all_time % 1000 == 500
         sta = sub_info['pulse']
 
         #  The pop-up dialog box waits for user input
@@ -182,7 +177,7 @@ class MainWindow(QMainWindow):
             self.run_a_dev(sub_id, command_num=5, command_vrg=vrg)
         set_time_dialog.destroy()
 
-    def set_wifi(self):
+    def set_wifi(self) -> None:
         """Set SSID and password for batch devices"""
         # Check if the user has selected the device
         if len(self.select_name) <= 0:
@@ -210,14 +205,14 @@ class MainWindow(QMainWindow):
             self.run_detection(command_num=6, command_vrg=vrg)
         dialog.destroy()
 
-    def set_root(self):
+    def set_root(self) -> None:
         """Go into root mode"""
         dialog = RootDialog(b=self.mDNS_info_sta)
         dialog.show()
         dialog.exec_()
         dialog.destroy()
 
-    def thread_deal_mDNS_new(self, cur_new_str):
+    def thread_deal_mDNS_new(self, cur_new_str: str) -> None:
         """
         Used to receive and process information from the mDNS thread
         :param cur_new_str: Data from the QTthread(mDNS)
@@ -237,15 +232,9 @@ class MainWindow(QMainWindow):
         port = new_list[2]
         data_info = eval(new_list[3])
         data = eval(str(data_info[b'data1'], encoding='utf8'))
-        if 'off' in data['switch']:
-            switch = False
-        else:
-            switch = True
+        switch = 'off' not in data['switch']
+        pulse = 'off' not in data['pulse']
 
-        if 'off' in data['pulse']:
-            pulse = False
-        else:
-            pulse = True
         self.mDNS_info_sta[name] = {
             'ip': ip,
             'port': port,
@@ -258,7 +247,7 @@ class MainWindow(QMainWindow):
         print(name, '>>>', self.mDNS_info_sta[name])
         self.new_sub_to_ui()
 
-    def new_sub_to_ui(self):
+    def new_sub_to_ui(self) -> None:
         """
         Check the mDNS_info_sta dictionary for new devices, and if so, add them to the UI_sub_info dictionary
         """
@@ -273,7 +262,7 @@ class MainWindow(QMainWindow):
                 self.table_all_sub.append(x)
         self.add_line_item()
 
-    def flash_name_id_to_ui(self):
+    def flash_name_id_to_ui(self) -> None:
         """
         Sort the devices for UI_sub_info
         """
@@ -287,45 +276,45 @@ class MainWindow(QMainWindow):
         self.sub_total = num
         self.add_line_item()
 
-    def table_check(self, b, c):
+    def table_check(self, row: int, column: int) -> None:
         """
-        The processing table is clicked on row B, column C
+        The processing table is clicked on row, column
         """
-        print('row', b, 'column', c)
-        self.ui.tableWidget.item(b, c).setSelected(False)
+        print('row', row, 'column', column)
+        self.ui.tableWidget.item(row, column).setSelected(False)
         # Find the corresponding name
         for x in self.UI_sub_info.keys():
             cur_sub = self.UI_sub_info[x]
-            if b == cur_sub['line_num']:
-                if c == 0:
+            if row == cur_sub['line_num']:
+                if column == 0:
                     if cur_sub['select_state']:
                         cur_sub['select_state'] = False
                         self.ui.tableWidget.item(
-                            b, 0
+                            row, 0
                         ).setBackgroundColor(QColor(255, 255, 255))
                         self.select_name.remove(x)
                     else:
                         cur_sub['select_state'] = True
                         self.ui.tableWidget.item(
-                            b, 0
+                            row, 0
                         ).setBackgroundColor(QColor(0, 0, 255))
                         self.select_name.append(x)
-                elif c == 1:
+                elif column == 1:
                     self.change_usr_name(x)
-                elif c == 2:
+                elif column == 2:
                     self.run_a_dev(sub_id=x, command_num=0, b='null')
-                elif c == 3:
+                elif column == 3:
                     self.run_a_dev(sub_id=x, command_num=1, b='null')
-                elif c == 4:
+                elif column == 4:
                     self.run_a_dev(sub_id=x, command_num=3, b='null')
-                elif c == 5:
+                elif column == 5:
                     self.run_a_dev(sub_id=x, command_num=4, b='null')
-                elif c == 6:
+                elif column == 6:
                     self.run_a_dev(sub_id=x, command_num=2, b='null')
-                elif c == 7:
+                elif column == 7:
                     self.set_POINT_a_sub(x)
 
-    def change_usr_name(self, sub_name):
+    def change_usr_name(self, sub_name: str) -> None:
         """
         Handle changing names
         :param sub_name: equipment ID
@@ -422,7 +411,7 @@ class MainWindow(QMainWindow):
         # Sets the table not to be edited
         self.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-    def result_to_ui(self, result_str):
+    def result_to_ui(self, result_str: str) -> None:
         """
         Process the information returned by the thread of execution
         :param result_str:Data from the QTthread
@@ -444,12 +433,12 @@ class MainWindow(QMainWindow):
         print('The return value is received：', result_list)
         self.send_result[result_list[0]] = eval(result_list[1])
 
-    def run_detection(self, command_num, **comand_vrg):
+    def run_detection(self, command_num: int, **command_vrg) -> None:
         """
         Pass the user selected device list and all device
          information to the thread of execution, which processes it
         :param command_num:Order number
-        :param comand_vrg:Parameters required to execute the command
+        :param command_vrg:Parameters required to execute the command
         :return: None
         """
         if len(self.select_name) <= 0:
@@ -461,13 +450,14 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes
             )
             return
+
         dicta = {
             'info': self.mDNS_info_sta,
-            'select_name_list': self.select_name
+            'select_name_list': self.select_name,
+            'command_num': command_num,
+            'command_vrg': command_vrg
         }
-        pass
-        dicta['command_num'] = command_num
-        dicta['command_vrg'] = comand_vrg
+
         self.result_ui = True
         if self.thread_number <= 0:
             self.thread_number += 1
@@ -484,13 +474,13 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes
             )
 
-    def run_a_dev(self, sub_id, command_num, **comand_vrg):
+    def run_a_dev(self, sub_id: str, command_num: int, **command_vrg) -> None:
         """
         Passes the user selected device list and individual device
         information to the thread
         :param sub_id: The ID of the target device
         :param command_num:Order number
-        :param comand_vrg:Parameters required to execute the command
+        :param command_vrg:Parameters required to execute the command
         :return:None
         """
         print('run_a_dev：', sub_id)
@@ -499,7 +489,7 @@ class MainWindow(QMainWindow):
             'info': self.mDNS_info_sta,
             'select_name_list': sud_id_tmp,
             'command_num': command_num,
-            'command_vrg': comand_vrg
+            'command_vrg': command_vrg
         }
 
         self.result_ui = False
@@ -518,7 +508,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.Yes
             )
 
-    def check_all(self):
+    def check_all(self) -> None:
         """Select all handler functions"""
         for x in self.UI_sub_info.keys():
             cur_sub = self.UI_sub_info[x]
@@ -529,7 +519,7 @@ class MainWindow(QMainWindow):
             if x not in self.select_name:
                 self.select_name.append(x)
 
-    def check_not(self):
+    def check_not(self) -> None:
         """Reverse select handler"""
         for x in self.UI_sub_info.keys():
             cur_sub = self.UI_sub_info[x]
@@ -542,7 +532,7 @@ class MainWindow(QMainWindow):
                 cur_sub['select_state'] = True
                 self.select_name.append(x)
 
-    def out_check(self):
+    def out_check(self) -> None:
         """Uncheck the handler function"""
         for x in self.UI_sub_info.keys():
             cur_sub = self.UI_sub_info[x]
@@ -552,7 +542,7 @@ class MainWindow(QMainWindow):
         self.select_name = []
 
     @staticmethod
-    def write_log(log_data):
+    def write_log(log_data: str) -> None:
         """
         Output log file
         :param log_data: Log data
@@ -570,7 +560,7 @@ class MainWindow(QMainWindow):
             print('main_window_error')
 
 
-def main():
+def main() -> None:
     app = QApplication(sys.argv)
     app_ui = MainWindow()
     app_ui.show()

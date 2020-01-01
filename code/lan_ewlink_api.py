@@ -5,6 +5,7 @@
 """
 import json
 import time
+from typing import Optional, Union
 
 import requests
 from PySide2.QtCore import QThread, Signal
@@ -21,12 +22,13 @@ class HttpAPI(object):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.send_error = 0
         self.send_text = ''
         self.send_response = ''
 
-    def post_request(self, url=None, data=None):
+    def post_request(self, url: Optional[str] = None,
+                     data: Optional[dict] = None) -> dict:
         """
         Only a simple HTTP(post) sending function is implemented
         Request is made with HTTP (port)
@@ -53,7 +55,8 @@ class HttpAPI(object):
             'text': response.text
         }
 
-    def write_log(self, log_data):
+    @staticmethod
+    def write_log(log_data: str) -> None:
         """
         Write to log file
         :param log_data:LOG Data
@@ -105,7 +108,7 @@ class ThreadForQT(QThread):
     """
     run_test_Thread = Signal(str)
 
-    def __init__(self, parent=None, **func_task):
+    def __init__(self, parent=None, **func_task) -> None:
         super().__init__(parent)
         # Device information (deviceID IP PORT)
         print('func_task', str(func_task))
@@ -126,10 +129,10 @@ class ThreadForQT(QThread):
 
         self.ht = HttpAPI()
 
-    def __def__(self):
+    def __def__(self) -> None:
         self.wait()
 
-    def run(self):
+    def run(self) -> None:
         """
         The function thread runs the function
         Execute the corresponding command based on the parameters passed during initialization
@@ -143,7 +146,7 @@ class ThreadForQT(QThread):
         # The end of the thread
         self.run_test_Thread.emit('END')
 
-    def performer_func(self, sub_id):
+    def performer_func(self, sub_id: str) -> int:
         cur_sub_info = self.all_info_dict[sub_id]
         print('performer_func', cur_sub_info)
         port = cur_sub_info['port']
@@ -151,10 +154,10 @@ class ThreadForQT(QThread):
         ret = 999
         if self.command_num == 0:
             # 0 command（'ON'）
-            ret = self.set_OUT(OUT=True, ip=ip, port=port, sub_id=sub_id)
+            ret = self.set_out(OUT=True, ip=ip, port=port, sub_id=sub_id)
         elif self.command_num == 1:
             # 1 command（'OFF'）
-            ret = self.set_OUT(OUT=False, ip=ip, port=port, sub_id=sub_id)
+            ret = self.set_out(OUT=False, ip=ip, port=port, sub_id=sub_id)
         elif self.command_num == 2:
             # 2 command（'Power-on-state-KEEP'）
             ret = self.set_power_up_state(
@@ -203,25 +206,24 @@ class ThreadForQT(QThread):
                                          port=port, sub_id=sub_id)
         return ret
 
-    def send_data(self, send_url, send_data):
+    def send_data(self, send_url: str, send_data: dict) -> Union[int, dict]:
         """
         send data to device by HTTP PORT
         """
         # try:
         print('send：', send_url, str(send_data))
+
         response = self.ht.post_request(send_url, send_data)
         print('response：', str(response))
+
         if response['result']:
             return json.loads(response['text'])
 
         return 1
 
-    def set_OUT(self, **info):
+    def set_out(self, **info) -> int:
         """
         Set the lights on and off
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     OUT(bool)The state that requires the device to be set
@@ -234,23 +236,17 @@ class ThreadForQT(QThread):
 
         data = {
             'sequence': str(int(time.time())),
-            'deviceid': info['sub_id']
+            'deviceid': info['sub_id'],
+            'data': {
+                'switch': 'on' if info['OUT'] else 'off'
+            }
         }
-
-        out_sta = info['OUT']
-        if out_sta:
-            data['data'] = {'switch': 'on'}
-        else:
-            data['data'] = {'switch': 'off'}
 
         return self.send_data(send_url=url, send_data=data)
 
-    def set_power_up_state(self, **info):
+    def set_power_up_state(self, **info) -> int:
         """
         Set the output state of the device when it is powered on
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     state(int)The state that requires the device to be set(0:off 1:on 2:keep )
@@ -277,12 +273,9 @@ class ThreadForQT(QThread):
 
         return self.send_data(send_url=url, send_data=data)
 
-    def get_signal_intensity(self, **info):
+    def get_signal_intensity(self, **info) -> int:
         """
         Get the signal strength of the device
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     ip(str)The IP address of the device
@@ -300,12 +293,9 @@ class ThreadForQT(QThread):
 
         return self.send_data(send_url=url, send_data=data)
 
-    def set_point_sewidth(self, **info):
+    def set_point_sewidth(self, **info) -> int:
         """
         Set the device's inching mode
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     pulseWidth(int)Delay millisecond(500-36000000)
@@ -328,12 +318,9 @@ class ThreadForQT(QThread):
         # 3. Call Http_API(postRequest) to send.
         return self.send_data(send_url=url, send_data=data)
 
-    def set_wifi(self, **info):
+    def set_wifi(self, **info) -> int:
         """
         Set the device's SSID info(SSID and password)
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     ssid(srt)new wifi SSID
@@ -356,12 +343,9 @@ class ThreadForQT(QThread):
 
         return self.send_data(send_url=url, send_data=data)
 
-    def set_unlock(self, **info):
+    def set_unlock(self, **info) -> Union[int, dict]:
         """
         Set the device's UNLOCK
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     ip(str)The IP address of the device
@@ -379,12 +363,9 @@ class ThreadForQT(QThread):
 
         return self.send_data(send_url=url, send_data=data)
 
-    def set_ota_flash(self, **info):
+    def set_ota_flash(self, **info) -> int:
         """
         Set the device's UNLOCK
-        Process: 1. Assembly url.
-                 2. Assemble data.
-                 3. Call Http_API(postRequest) to send.
 
         :param info:
                     sever_ip(str)IP of the firmware server
@@ -405,7 +386,7 @@ class ThreadForQT(QThread):
 
         return self.send_data(send_url=url, send_data=data)
 
-    def get_dev_info_api(self, **info):
+    def get_dev_info_api(self, **info) -> int:
         """
         get device info
         """
@@ -419,7 +400,7 @@ class ThreadForQT(QThread):
         return self.send_data(send_url=url, send_data=data)
 
     @staticmethod
-    def get_url(info, path) -> str:
+    def get_url(info: dict, path: str) -> str:
         ip = info['ip']
         port = info['port']
         return f'http://{ip}:{port}/zeroconf/{path}'
